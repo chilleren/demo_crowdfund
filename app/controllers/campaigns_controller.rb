@@ -1,4 +1,5 @@
 class CampaignsController < ApplicationController
+  before_action :logged_in_user, only: [:new, :create, :edit, :update, :destroy]
   before_action :correct_user, only: [:edit, :update, :destroy]
 
   def new
@@ -51,6 +52,13 @@ class CampaignsController < ApplicationController
     def correct_user
       campaign = Campaign.find(params[:id])
       raise ActionController::RoutingError.new('Not Found') unless current_user.id == campaign.user_id
+    end
+    
+    def logged_in_user
+      unless logged_in?
+        flash[:alert] = "You need to log in first"
+        redirect_to login_url
+      end
     end
 
 end
