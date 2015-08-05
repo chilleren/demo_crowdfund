@@ -1,10 +1,20 @@
 class CampaignsController < ApplicationController
+  before_action :correct_user, only: [:edit, :update, :destroy]
 
   def new
     @campaign = Campaign.new
   end
 
   def create
+    @campaign = current_user.campaigns.build(campaign_params)
+
+    if @campaign.save
+      flash[:notice] = "Your campaign was created successfully!"
+      redirect_to campaign_path(@campaign)
+    else
+      flash.now[:alert] = "Something went wrong!"
+      render 'new'
+    end
   end
 
   def index
@@ -20,9 +30,27 @@ class CampaignsController < ApplicationController
   end
 
   def update
+    @campaign = Campaign.find(params[:id])
+    if @campaign.update campaign_params
+      flash[:notice] = "Your campaign was created successfully!"
+      redirect_to campaign_path(@campaign)
+    else
+      flash.now[:alert] = "Something went wrong!"
+      render 'new'
+    end
   end
 
   def destroy
   end
+
+  private
+    def campaign_params
+      params.require(:campaign).permit(:title, :description)
+    end
+
+    def correct_user
+      campaign = Campaign.find(params[:id])
+      raise ActionController::RoutingError.new('Not Found') unless current_user.id == campaign.user_id
+    end
 
 end
